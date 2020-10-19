@@ -1,0 +1,2 @@
+Ana Correia;12345;dentista;aguiar@gmail.com;;;
+João Vieira;98765;clinica geral;vieira@gmail.com;;;
