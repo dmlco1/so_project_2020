@@ -11,7 +11,6 @@ if [ -f medicos.txt ] || [ -f pacientes.txt ]; then
 
 	while read line
 	do	
-		echo $line
 		linha=$(echo $line | cut -d';' -f7)
 
 		if [ $linha -gt $2 ]; then
