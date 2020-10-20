@@ -19,7 +19,6 @@ if [ -f medicos.txt ] || [ -f pacientes.txt ]; then
 		fi
 
 	done < medicos.txt
-	#rm aux.txt
 
 	echo "Pacientes: $numeropacientes; Médicos : $countmedicos"
 

@@ -1,10 +1,7 @@
 #!/bin/bash
 file=/etc/passwd
 if [ -f $file ] ; then
-    cat $file | grep "^a""[0-9+]" | head -10 | sed 's/^a//g' | cut -d':' -f1,5 | sed 's/:/;/g' | sed 's/,/;/g' > nomes.txt
-    cat nomes.txt | cut -d';' -f1 | while read line; do
-        cat nomes.txt | sed "s/$/a$line@iscte.iul.pt;100/" > pacientes.txt
-    done
+    cat $file | awk '/^a[0-9+]/' | head | awk -F':' '{print $1";"$5}' | awk -F';' '{print $1";"$2}' | awk -F';' '{print $1";"$2$3$4$5$1"@iscte-iul.pt"";""100"}' | sed 's/,/;/g' | sed 's/^a//' > teste.txt
 else
     echo "O ficheiro não existe"
 fi
