@@ -1,3 +1,4 @@
-Ana Correia;12345;dentista;aguiar@gmail.com;4;7;600
-João Vieira;98765;clinica geral;vieira@gmail.com;0;0;0
-"Ana;Magalhães";48194;dermatologista;0;0;0
+Ana Correia;12345;dentista;aguiar@gmail.com;3;8;0
+João Vieira;98765;clinica geral;vieira@gmail.com;3;9;0
+Angela Maria;44444;dentista;angela@gmail.com;0;0;0
+Miguel Antonio;22123;dentista;mm@gmail.com;0;0;0

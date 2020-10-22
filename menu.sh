@@ -1,4 +1,5 @@
 #!/bin/bash
+
 while $true; do
 	echo "1.Cria pacientes"
 	echo "2.Cria médicos"
@@ -16,14 +17,22 @@ while $true; do
 		./cria_pacientes.sh
 		;;
 		2)
-		echo "Introduza os argumentos (Nome, nº de cédula profissional, especialidade médica, e-mail)"
-		read args
-		./cria_medico.sh $args
+		echo "Introduza o Nome:"
+		read nome
+		echo "Introduza a cédula:"
+		read cedula
+		echo "Introduza a especialidade:"
+		read especialidade
+		echo "Introduza o email:"
+		read email
+		./cria_medico.sh "$nome" "$cedula" "$especialidade" "$email"
 		;; 
 		3)
-		echo "Introduza os argumentos (Localidade, Saldo mínimo)"
-		read args
-		./stats.sh $args
+		echo "Introduza a localidade"
+		read localidade
+		echo "Introduza o Saldo mínimo"
+		read saldo
+		./stats.sh $localidade $saldo
 		;;
 		4)
 		./avalia_medicos.sh
