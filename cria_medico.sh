@@ -13,7 +13,10 @@ if [ -f medicos.txt ]; then
 	else
 		echo "Este médico já existe"
 	fi
+	
+	cat medicos.txt
 
 else
 	echo "$1;$2;$3;$4;0;0;0" >> medicos.txt
+	cat medicos.txt
 fi
