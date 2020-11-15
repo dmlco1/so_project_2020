@@ -3,3 +3,4 @@ João Vieira;98765;clinica geral;vieira@gmail.com;3;9;0
 Angela Maria;44444;dentista;angela@gmail.com;0;0;0
 Miguel Antonio;22123;dentista;mm@gmail.com;0;0;0
 Marta Fernandes;95733;oftalmologista;marta@gmail.com;0;0;0
+Afonso Silva;68444;dentista;afonso@gmail.com;0;0;0
