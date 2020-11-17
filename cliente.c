@@ -1,8 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<signal.h>
-
-int waiting_list;
+#include<sys/types.h>
+int waiting_list = 0;
 int n;
 
 typedef struct{
@@ -21,8 +21,9 @@ int verificar_ficheiro_pedido_consultas_existe(){
 
     //if the file is empy that means that it didn't existed before the fopen call
     if(file == NULL){
-        return 0;
-    }
+        waiting_list = 1;
+		return 0;
+	}
     return 1;
 }
 
@@ -109,7 +110,10 @@ void cancelar_espera(){
 
 
 void sinal_alarme(int sinal){
-	waiting_list = 1;
+
+	if(waiting_list == 0){
+		printf("\nA tentar enviar sinal\n");
+	}
 }
 
 int main(){
@@ -128,18 +132,19 @@ int main(){
 	printf("Tipo: %d, Descricao: %s, ID= %d\n", c.tipo, c.descricao, c.pid_consulta);
 
 	//Check if PedidoConsulta.txt already exists
-	if(verificar_ficheiro_pedido_consultas_existe()){
+	while(verificar_ficheiro_pedido_consultas_existe() != 0){
         
-        printf("O ficheiro ja existe... espere uns segundos...");
+        printf("\nO ficheiro ja existe... espere uns segundos...\n");
         
         signal(SIGALRM, sinal_alarme);
 
-        alarm(10);
+		printf("\nEm espera...\n");
+		alarm(10);		
 
-        while(waiting_list == 0);
-		printf("ok\n");
+		pause();
     }	
 
+	
 
 	//c2) Criar Pedido de Consulta
 	pedir_consulta(c);
