@@ -2,16 +2,19 @@
 #include<stdlib.h>
 #include<signal.h>
 #include<sys/types.h>
+
+#include "consulta.h" //include the typedef of Consulta, defined in file consulta.h
+
 int waiting_list = 0;
 int n;
 
-typedef struct{
-
-	int tipo; // tipo de consulta: 1-Normal, 2-COVID-19, 3-Urgente
-	char descricao[100]; //descricao da consulta
-	int pid_consulta; // PID do processo que quer fazer a consulta
-
-}Consulta;
+//typedef struct{
+//
+//	int tipo; // tipo de consulta: 1-Normal, 2-COVID-19, 3-Urgente
+//	char descricao[100]; //descricao da consulta
+//	int pid_consulta; // PID do processo que quer fazer a consulta
+//
+//}Consulta;
 
 int verificar_ficheiro_pedido_consultas_existe(){
 
@@ -72,6 +75,7 @@ void consulta_iniciada(){
 	printf("PedidoConsulta.txt removido com sucesso!\n");
 
 	n = 1;
+	pause();
 }
 
 //After receiving signal SIGTERM
@@ -148,7 +152,6 @@ int main(){
 
 	//c2) Criar Pedido de Consulta
 	pedir_consulta(c);
-
 	
 	//c3) Send signal SIGUSR1 to the server
 	kill(pid_of_SrvConsultas(), SIGUSR1);
