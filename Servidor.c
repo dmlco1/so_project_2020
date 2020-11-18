@@ -12,6 +12,8 @@ int count_consulta_perdida;
 int n;
 
 Consulta *lista_consultas=NULL;
+int *indice_lista_consultas = NULL;
+
 
 //Create file SrvConsultas
 void escrever_Pid_SrvConsultas(){
@@ -50,17 +52,31 @@ Consulta ler_Pedido_Consulta(){
 }
 
 
+//Ver se a lista de consultas tem vaga para a consulta
 int verificar_vaga_lista_consultas(){
-
+	indice_lista_consultas = malloc(sizeof(int));
+	
     for(int i = 0; i < 10; i++){
         if((lista_consultas[i]).tipo == -1){
-            return 1;
+            *indice_lista_consultas = i;
+			return 1;
         }
     }
     return 0;
 }
 
+//Escolher qual dos contadores incrementar, dependendo do tipo de consulta
+void incrementar_Contador_Consultas(int tipo){
+	switch(tipo){
+	case 1: count_consulta_1++; break;
+	case 2: count_consulta_2++; break;
+	case 3: count_consulta_3++; break;
+	default: perror("Erro!"); break;
+	}
+}
 
+
+//After receiving signal SIGUSR1
 void tratar_Pedido_consulta(){
     Consulta c = ler_Pedido_Consulta();
 
@@ -69,15 +85,13 @@ void tratar_Pedido_consulta(){
     printf("Chegou novo pedido de consulta do tipo: %d, descricao: %s e PID: %d\n", c.tipo, c.descricao, c.pid_consulta);
 
     if(verificar_vaga_lista_consultas()){
-        for(int i = 0; i < 10; i++){
-            if((lista_consultas[i]).tipo == -1){
-                lista_consultas[i] = c;
-                printf("%d\n", lista_consultas[i].tipo);
-                printf("%s\n", lista_consultas[i].descricao);
-                printf("%d\n", lista_consultas[i].pid_consulta);
-			}
-        }
-    }
+		//como tem vaga na lista, adicionar a consulta a primeira posicao vaga
+		lista_consultas[*indice_lista_consultas] = c;
+		printf("adicionado!!\n");
+	
+		//Incrementar o contador do respetivo tipo da consulta
+		incrementar_Contador_Consultas(c.tipo);
+	}
 	//s3.3: if lista_consultas is full send signal sigusr2 to cliente 
     else{
         printf("Lista de consultas cheia\n");
