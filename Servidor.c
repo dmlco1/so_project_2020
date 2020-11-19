@@ -9,6 +9,7 @@ int count_consulta_2;
 int count_consulta_3;
 int count_consulta_perdida;
 
+int n_Alarme;
 int n;
 
 Consulta *lista_consultas=NULL;
@@ -75,6 +76,45 @@ void incrementar_Contador_Consultas(int tipo){
 	}
 }
 
+//After Receiving the signal SIGALRM
+void sinal_alarme(int sinal){
+    if(sinal == SIGALRM){
+        n_Alarme = 1;
+    }
+}
+
+void tratar_Consulta(){
+
+    int n = fork();
+
+    if(n == 0){
+        //Processo filho
+        printf("Filhoooo\n");
+		//Enviar SIGHUP a cliente
+		kill(lista_consultas[*indice_lista_consultas].pid_consulta, SIGHUP);
+		
+		//Wait 10 seconds until end of consulta
+		signal(SIGALRM, sinal_alarme);
+        alarm(10);
+
+        while(n_Alarme == 0){
+            pause();    
+        }
+
+		printf("Consulta terminada na sala %d\n", *indice_lista_consultas);		
+
+		//Send signal SIGTERM to cliente
+		kill(lista_consultas[*indice_lista_consultas].pid_consulta, SIGTERM);
+		exit(0);
+    }
+
+    //Processo Pai a espera que processo filho termine
+    wait(NULL);
+
+	lista_consultas[*indice_lista_consultas].tipo = -1;
+    *indice_lista_consultas = *indice_lista_consultas - 1;
+}
+
 
 //After receiving signal SIGUSR1
 void tratar_Pedido_consulta(){
@@ -91,6 +131,9 @@ void tratar_Pedido_consulta(){
 	
 		//Incrementar o contador do respetivo tipo da consulta
 		incrementar_Contador_Consultas(c.tipo);
+
+		//Fazer fork() e tratar a consulta
+		tratar_Consulta();
 	}
 	//s3.3: if lista_consultas is full send signal sigusr2 to cliente 
     else{
@@ -110,7 +153,7 @@ int main(){
 
 	//s1
 	lista_consultas = malloc(10 * sizeof(int));
-	for(int i = 0; i < 10; i++){
+	for(int i = 0; i < 6; i++){
 		lista_consultas[i].tipo = -1;
 	}
 
