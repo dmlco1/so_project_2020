@@ -3,6 +3,7 @@
 #include<signal.h>
 #include<sys/types.h>
 #include "consulta.h"
+#include<unistd.h>
 
 int count_consulta_1;
 int count_consulta_2;
@@ -10,7 +11,6 @@ int count_consulta_3;
 int count_consulta_perdida;
 
 int n_Alarme;
-int n;
 
 Consulta *lista_consultas=NULL;
 int *indice_lista_consultas = NULL;
@@ -28,11 +28,30 @@ void escrever_Pid_SrvConsultas(){
     fclose(file);
 }
 
+
+void obter_campo(char linha[], char total[], char delimitador, int indice){
+	int k = 0;
+    int j = 0;
+
+    for(int i = 0; linha[i] != '\0'; i++){
+        if(linha[i] == delimitador){
+            k++;
+        }
+        else if(k == indice){
+            total[j++] = linha[i];
+        }
+    }
+    total[j] = '\0'; 
+}
+
+
 //mudar para fget... colocar tudo na mesma linha
 Consulta ler_Pedido_Consulta(){
 
 	Consulta c;
-	int n;
+
+	char linha[100];
+    char lido[70];
 
     FILE *file;
     file = fopen("PedidoConsulta.txt", "r");
@@ -42,14 +61,22 @@ Consulta ler_Pedido_Consulta(){
 		exit(1);
     }   
 
-    fscanf(file, "%d", &c.tipo);
-	fscanf(file, "%s", c.descricao);
-	fscanf(file, "%d", &c.pid_consulta);
+	fgets(linha, 100, file); 
 	
     fclose(file);
 
-	//c.tipo = n;    
-    return c;
+	//Ler tipo consulta
+	obter_campo(linha, lido, ',', 0);
+	c.tipo = atoi(lido);	
+
+	//Ler descricao consulta
+	obter_campo(linha, c.descricao, ',', 1);
+
+	//Ler pid consulta
+	obter_campo(linha, lido, ',', 2);
+    c.pid_consulta = atoi(lido); 
+	
+	return c;
 }
 
 
@@ -142,9 +169,18 @@ void tratar_Pedido_consulta(){
 		count_consulta_perdida++;
 	}
 
-    n = 1;
+//n=1
 }
 
+
+void encerrar(){
+
+    //remove file PedidoConsulta.txt
+    remove("SrvConsultas.pid");
+    printf("\nSrvConsultas.pid removido com sucesso!\n");
+
+    exit(0);
+}
 
 
 int main(){
@@ -164,9 +200,11 @@ int main(){
 	//s3: Tratar sinal SIGUSR1
     signal(SIGUSR1, tratar_Pedido_consulta);
 
-	//Waiting to receive a signal
+	//s4: Tratar sinal SIGINT
+    signal(SIGINT, encerrar);
 
-    while(n == 0){
+	//Waiting to receive a signal
+    while(1){
         pause();
     }
 

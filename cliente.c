@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<signal.h>
 #include<sys/types.h>
+#include<unistd.h>
 
 #include "consulta.h" //include the typedef of Consulta, defined in file consulta.h
 
@@ -36,9 +37,9 @@ void pedir_consulta(Consulta c){
 	file = fopen("PedidoConsulta.txt", "w");
 
 	//Escrever os dados no ficheiro PedidoConsulta.txt
-    fprintf(file, "%d\n", c.tipo); 
-    fprintf(file, "%s\n", c.descricao);
-	fprintf(file, "%d\n", c.pid_consulta);
+    fprintf(file, "%d,%s,%d\n", c.tipo, c.descricao, c.pid_consulta); 
+    //fprintf(file, "%s\n", c.descricao);
+	//fprintf(file, "%d\n", c.pid_consulta);
 	
 	fclose(file);
 }
@@ -61,7 +62,7 @@ int pid_of_SrvConsultas(){
 
     fclose(file);
 	
-	printf("O pid do Srv e %d\n", getpid());
+	printf("O pid do Srv e %d\n", pid);
 	
     return pid;
 }
@@ -71,7 +72,7 @@ void consulta_iniciada(){
     printf("Consulta iniciada para o processo: %d\n", getpid());
 	
 	//remove file PedidoConsulta.txt
-	remove("PedidoConsulta.txt");
+	//remove("PedidoConsulta.txt");
 	printf("PedidoConsulta.txt removido com sucesso!\n");
 
 	n = 1;
@@ -84,7 +85,8 @@ void consulta_terminada(){
 		//Check if signal SIGHUP has already been sent
 		if(n == 1){
 			printf("Consulta concluida para o processo: %d\n", getpid());
-			n = 2;
+			//n = 2;
+			remove("PedidoConsulta.txt");
 			return;
 		}
 
