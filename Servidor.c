@@ -193,14 +193,6 @@ void atualizarStats(){
 
     file = fopen("StatsConsultas.dat", "w");
 
-    //if the file is empy insert the data
-    //if(file == NULL){
-	//	fprintf(file, "Perdidas:%d\n", count_consulta_perdida);
-	//	fprintf(file, "Tipo 1:%d\n", count_consulta_1);
-	//	fprintf(file, "Tipo 2:%d\n", count_consulta_2);
-	//	fprintf(file, "Tipo 3:%d\n", count_consulta_3);
-	//}
-	
 	//if the file already exists update values
 	int count;
 	char linha[100];
