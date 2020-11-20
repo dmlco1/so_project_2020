@@ -48,7 +48,6 @@ void obter_campo(char linha[], char total[], char delimitador, int indice){
 }
 
 
-//mudar para fget... colocar tudo na mesma linha
 Consulta ler_Pedido_Consulta(){
 
 	Consulta c;
@@ -60,7 +59,7 @@ Consulta ler_Pedido_Consulta(){
     file = fopen("PedidoConsulta.txt", "r");
 
     if(file == NULL){
-		perror("Erro de leitura do Ficheiro");
+		perror("Erro de leitura do Ficheiro\n");
 		exit(1);
     }   
 
@@ -78,7 +77,7 @@ Consulta ler_Pedido_Consulta(){
 	//Ler pid consulta
 	obter_campo(linha, lido, ',', 2);
     c.pid_consulta = atoi(lido); 
-	printf("O PID da consulta e %d", c.pid_consulta);	
+	
 	return c;
 }
 
@@ -141,7 +140,7 @@ void tratar_Consulta(){
     wait(NULL);
 
 	lista_consultas[*indice_lista_consultas].tipo = -1;
-    *indice_lista_consultas = *indice_lista_consultas - 1;
+    //*indice_lista_consultas = *indice_lista_consultas - 1;
 }
 
 
@@ -149,14 +148,12 @@ void tratar_Consulta(){
 void tratar_Pedido_consulta(){
     Consulta c = ler_Pedido_Consulta();
 
-    printf("->Sinal Recebido!!\n");
-
     printf("Chegou novo pedido de consulta do tipo: %d, descricao: %s e PID: %d\n", c.tipo, c.descricao, c.pid_consulta);
 
     if(verificar_vaga_lista_consultas()){
 		//como tem vaga na lista, adicionar a consulta a primeira posicao vaga
 		lista_consultas[*indice_lista_consultas] = c;
-		printf("adicionado!!\n");
+		printf("Consulta agendada para para a sala %d\n", *indice_lista_consultas);
 	
 		//Incrementar o contador do respetivo tipo da consulta
 		incrementar_Contador_Consultas(c.tipo);
