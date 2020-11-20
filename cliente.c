@@ -122,7 +122,7 @@ int main(){
 	printf("Introduza o tipo de consulta (1: Normal; 2: COVID-19; 3: Urgente):\n");
 	scanf("%d", &c.tipo);
 
-	if(c.tipo != 1 && c.tipo && 2 && c.tipo != 3){
+	if(c.tipo != 1 && c.tipo != 2 && c.tipo != 3){
 		printf("Tipo Invalido!\n");
 		exit(0);
 	}

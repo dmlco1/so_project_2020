@@ -11,6 +11,8 @@ int count_consulta_3;
 int count_consulta_perdida;
 
 int n_Alarme;
+int acabar = 0;
+
 
 Consulta *lista_consultas=NULL;
 int *indice_lista_consultas = NULL;
@@ -168,8 +170,22 @@ void tratar_Pedido_consulta(){
         kill(c.pid_consulta, SIGUSR2);
 		count_consulta_perdida++;
 	}
+}
 
-//n=1
+
+void atualizarStats(){
+
+	 FILE *file;
+
+    file = fopen("StatsConsultas.dat", "w");
+
+    //if the file is empy insert the data
+    fprintf(file, "Perdidas: %d\n", count_consulta_perdida);
+	fprintf(file, "Tipo 1: %d\n", count_consulta_1);
+	fprintf(file, "Tipo 2: %d\n", count_consulta_2);
+	fprintf(file, "Tipo 3: %d\n", count_consulta_3);
+
+    fclose(file);
 }
 
 
@@ -178,8 +194,8 @@ void encerrar(){
     //remove file PedidoConsulta.txt
     remove("SrvConsultas.pid");
     printf("\nSrvConsultas.pid removido com sucesso!\n");
-
-    exit(0);
+	atualizarStats();
+    acabar = 1;
 }
 
 
@@ -202,7 +218,7 @@ int main(){
     signal(SIGINT, encerrar);
 
 	//Waiting to receive a signal
-    while(1){
+    while(acabar==0){
         pause();
     }
 
