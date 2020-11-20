@@ -9,14 +9,6 @@
 int waiting_list = 0;
 int n;
 
-//typedef struct{
-//
-//	int tipo; // tipo de consulta: 1-Normal, 2-COVID-19, 3-Urgente
-//	char descricao[100]; //descricao da consulta
-//	int pid_consulta; // PID do processo que quer fazer a consulta
-//
-//}Consulta;
-
 int verificar_ficheiro_pedido_consultas_existe(){
 
     FILE *file;
@@ -28,6 +20,7 @@ int verificar_ficheiro_pedido_consultas_existe(){
         waiting_list = 1;
 		return 0;
 	}
+	fclose(file);
     return 1;
 }
 
@@ -126,16 +119,28 @@ int main(){
 	Consulta c;
 
 	//c1) Introduzir os dados
-	printf("Introduza o tipo de consulta:\n");
+	printf("Introduza o tipo de consulta (1: Normal; 2: COVID-19; 3: Urgente):\n");
 	scanf("%d", &c.tipo);
 
-	printf("Introduza a descricao da Consulta: \n");
-	scanf("%s", c.descricao);
+	if(c.tipo != 1 && c.tipo && 2 && c.tipo != 3){
+		printf("Tipo Invalido!\n");
+		exit(0);
+	}
+
+	// Ler Descricao e garantir que le mesmo que tenha espacos em branco
+	char descricao[100];
+	char temp;	
+	printf("Introduza a descricao da Consulta:\n");
+	scanf("%c", &temp);
+	
+	scanf("%[^\n]", descricao);	
+
+	memcpy(c.descricao,descricao,100);
 
 	//PID consulta e o PID deste processo
 	c.pid_consulta = getpid();
 
-	printf("Tipo: %d, Descricao: %s, ID= %d\n", c.tipo, c.descricao, c.pid_consulta);
+	printf("Tipo: %d, Descricao: %s, PID= %d\n", c.tipo, c.descricao, c.pid_consulta);
 
 	//Check if PedidoConsulta.txt already exists
 	while(verificar_ficheiro_pedido_consultas_existe() != 0){
@@ -180,9 +185,9 @@ int main(){
 
 	
 	//If signal SIGHUP was sent, pause until receive signal SIGTEMP
-	if(n == 1){
-		pause();
-	}
+	//if(n == 1){
+	//	pause();
+	//}
 
 	printf("-> Sinal recebido!!\n");	
 	return 0;	

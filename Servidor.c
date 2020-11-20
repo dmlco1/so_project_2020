@@ -75,7 +75,7 @@ Consulta ler_Pedido_Consulta(){
 	//Ler pid consulta
 	obter_campo(linha, lido, ',', 2);
     c.pid_consulta = atoi(lido); 
-	
+	printf("O PID da consulta e %d", c.pid_consulta);	
 	return c;
 }
 
@@ -184,8 +184,6 @@ void encerrar(){
 
 
 int main(){
-
-	//Consulta *lista_consultas=NULL;
 
 	//s1
 	lista_consultas = malloc(10 * sizeof(int));
