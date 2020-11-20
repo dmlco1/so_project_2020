@@ -53,7 +53,7 @@ Consulta ler_Pedido_Consulta(){
 	Consulta c;
 
 	char linha[100];
-    char lido[70];
+    char valor[100];
 
     FILE *file;
     file = fopen("PedidoConsulta.txt", "r");
@@ -68,15 +68,15 @@ Consulta ler_Pedido_Consulta(){
     fclose(file);
 
 	//Ler tipo consulta
-	obter_campo(linha, lido, ',', 0);
-	c.tipo = atoi(lido);	
+	obter_campo(linha, valor, ',', 0);
+	c.tipo = atoi(valor);	
 
 	//Ler descricao consulta
 	obter_campo(linha, c.descricao, ',', 1);
 
 	//Ler pid consulta
-	obter_campo(linha, lido, ',', 2);
-    c.pid_consulta = atoi(lido); 
+	obter_campo(linha, valor, ',', 2);
+    c.pid_consulta = atoi(valor); 
 	
 	return c;
 }

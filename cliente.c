@@ -129,9 +129,9 @@ int main(){
 
 	// Ler Descricao e garantir que le mesmo que tenha espacos em branco
 	char descricao[100];
-	char temp;	
+	char aux;	
 	printf("Introduza a descricao da Consulta:\n");
-	scanf("%c", &temp);
+	scanf("%c", &aux);
 	
 	scanf("%[^\n]", descricao);	
 
