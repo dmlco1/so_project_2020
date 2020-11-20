@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<signal.h>
 #include<sys/types.h>
+#include<sys/wait.h>
 #include "consulta.h"
 #include<unistd.h>
 
@@ -118,7 +119,6 @@ void tratar_Consulta(){
 
     if(n == 0){
         //Processo filho
-        printf("Filhoooo\n");
 		//Enviar SIGHUP a cliente
 		kill(lista_consultas[*indice_lista_consultas].pid_consulta, SIGHUP);
 		
@@ -173,6 +173,23 @@ void tratar_Pedido_consulta(){
 }
 
 
+void update_stat(char linha[], char total[], char delimitador, int indice){
+    int k = 0;
+    int j = 0;
+
+    for(int i = 0; linha[i] != '\0'; i++){
+        if(linha[i] == delimitador){
+            k++;
+        }
+        else if(k == indice){
+            total[j++] = linha[i];
+        }
+    }
+    total[j] = '\0';
+}
+
+
+
 void atualizarStats(){
 
 	 FILE *file;
@@ -180,12 +197,47 @@ void atualizarStats(){
     file = fopen("StatsConsultas.dat", "w");
 
     //if the file is empy insert the data
-    fprintf(file, "Perdidas: %d\n", count_consulta_perdida);
-	fprintf(file, "Tipo 1: %d\n", count_consulta_1);
-	fprintf(file, "Tipo 2: %d\n", count_consulta_2);
-	fprintf(file, "Tipo 3: %d\n", count_consulta_3);
+    //if(file == NULL){
+	//	fprintf(file, "Perdidas:%d\n", count_consulta_perdida);
+	//	fprintf(file, "Tipo 1:%d\n", count_consulta_1);
+	//	fprintf(file, "Tipo 2:%d\n", count_consulta_2);
+	//	fprintf(file, "Tipo 3:%d\n", count_consulta_3);
+	//}
+	
+	//if the file already exists update values
+	int count;
+	char linha[100];
+	char valor[100];
+	
+	//update consultas perdidas
+	fgets(linha, 100, file);	
 
-    fclose(file);
+	update_stat(linha, valor, ':', 1);	
+	count = atoi(valor) + count_consulta_perdida;
+	fprintf(file, "Perdidos:%d\n", count);
+
+	//update consultas tipo 1
+	fgets(linha, 100, file);    
+
+    update_stat(linha, valor, ':', 1);
+    count = atoi(valor) + count_consulta_1;
+    fprintf(file, "Tipo 1:%d\n", count);
+
+	//update consultas tipo 2
+    fgets(linha, 100, file);
+
+    update_stat(linha, valor, ':', 1);
+    count = atoi(valor) + count_consulta_2;
+    fprintf(file, "Tipo 2:%d\n", count);
+
+	//update consultas tipo 3
+    fgets(linha, 100, file);
+    
+    update_stat(linha, valor, ':', 3);
+    count = atoi(valor) + count_consulta_3;
+    fprintf(file, "Tipo 3:%d\n", count);
+
+	fclose(file);
 }
 
 
@@ -203,7 +255,7 @@ int main(){
 
 	//s1
 	lista_consultas = malloc(10 * sizeof(int));
-	for(int i = 0; i < 6; i++){
+	for(int i = 0; i < 10; i++){
 		lista_consultas[i].tipo = -1;
 	}
 
