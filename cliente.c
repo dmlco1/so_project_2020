@@ -31,8 +31,6 @@ void pedir_consulta(Consulta c){
 
 	//Escrever os dados no ficheiro PedidoConsulta.txt
     fprintf(file, "%d,%s,%d\n", c.tipo, c.descricao, c.pid_consulta); 
-    //fprintf(file, "%s\n", c.descricao);
-	//fprintf(file, "%d\n", c.pid_consulta);
 	
 	fclose(file);
 }
@@ -55,19 +53,13 @@ int pid_of_SrvConsultas(){
 
     fclose(file);
 	
-	printf("O pid do Srv e %d\n", pid);
-	
     return pid;
 }
 
-//After receiving signal SIGHUP - delete file PedidoConsulta.txt
+//After receiving signal SIGHUP
 void consulta_iniciada(){
     printf("Consulta iniciada para o processo: %d\n", getpid());
 	
-	//remove file PedidoConsulta.txt
-	//remove("PedidoConsulta.txt");
-	printf("PedidoConsulta.txt removido com sucesso!\n");
-
 	n = 1;
 	pause();
 }
@@ -79,7 +71,8 @@ void consulta_terminada(){
 		if(n == 1){
 			printf("Consulta concluida para o processo: %d\n", getpid());
 			//n = 2;
-			remove("PedidoConsulta.txt");
+			remove("PedidoConsulta.txt"); //Apagar o Pedido de Consulta apos o fim da consulta e nao no inicio
+			//Ao apagar a consulta ao receber o SIGHUP, as consultas nao iriam ficar em lista de espera depois na alinea c8
 			return;
 		}
 
@@ -162,9 +155,7 @@ int main(){
 	
 	//c3) Send signal SIGUSR1 to the server
 	kill(pid_of_SrvConsultas(), SIGUSR1);
-	printf("-> Sinal enviado!!\n");
 
-	printf("PID=%d\n", getpid());
 	
 	//c4) 
 	signal(SIGHUP, consulta_iniciada);
@@ -182,17 +173,7 @@ int main(){
 	while(n == 0){
         pause();
     }
-
 	
-	//If signal SIGHUP was sent, pause until receive signal SIGTEMP
-	//if(n == 1){
-	//	pause();
-	//}
-
-	printf("-> Sinal recebido!!\n");	
 	return 0;	
-
-
-
 
 }

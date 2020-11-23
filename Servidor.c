@@ -186,15 +186,15 @@ void update_stat(char linha[], char total[], char delimitador, int indice){
 }
 
 
-
 void atualizarStats(){
 
 	 FILE *file;
 
-    file = fopen("StatsConsultas.dat", "w");
+    file = fopen("StatsConsultas.dat", "rt");
 
 	//if the file already exists update values
 	int count;
+	int aux;
 	char linha[100];
 	char valor[100];
 	
@@ -203,14 +203,20 @@ void atualizarStats(){
 
 	update_stat(linha, valor, ':', 1);	
 	count = atoi(valor) + count_consulta_perdida;
+	printf("Perdidas total %d", count);
+	
 	fprintf(file, "Perdidos:%d\n", count);
 
 	//update consultas tipo 1
 	fgets(linha, 100, file);    
-
+	printf("linhaaa %s\n", linha);	
     update_stat(linha, valor, ':', 1);
-    count = atoi(valor) + count_consulta_1;
-    fprintf(file, "Tipo 1:%d\n", count);
+	printf("valor seraaaaa -- %s\n", valor);
+	aux = atoi(valor);
+	count = aux + count_consulta_1;
+	printf("O valor existente e: %d\n", aux);
+    printf("---1 total %d\n", count);
+	fprintf(file, "Tipo 1:%d\n", count);
 
 	//update consultas tipo 2
     fgets(linha, 100, file);
