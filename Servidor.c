@@ -169,22 +169,6 @@ void tratar_Pedido_consulta(){
 }
 
 
-void update_stat(char linha[], char total[], char delimitador, int indice){
-    int k = 0;
-    int j = 0;
-
-    for(int i = 0; linha[i] != '\0'; i++){
-        if(linha[i] == delimitador){
-            k++;
-        }
-        else if(k == indice){
-            total[j++] = linha[i];
-        }
-    }
-    total[j] = '\0';
-}
-
-
 void atualizarStats(){
    
 	int count;
@@ -213,22 +197,22 @@ void atualizarStats(){
 		file = fopen("StatsConsultas.dat", "r");
 
 		fgets(linha, 100, file);  
-		update_stat(linha, valor, ':', 1);
+		obter_campo(linha, valor, ':', 1);
 		aux = atoi(valor);
 		countP = aux + count_consulta_perdida;	
 		
 		fgets(linha, 100, file);
-        update_stat(linha, valor, ':', 1);
+        obter_campo(linha, valor, ':', 1);
         aux = atoi(valor);
         count1 = aux + count_consulta_1; 
 
 		fgets(linha, 100, file);
-        update_stat(linha, valor, ':', 1);
+        obter_campo(linha, valor, ':', 1);
         aux = atoi(valor);
         count2 = aux + count_consulta_2;
 
 		fgets(linha, 100, file);
-        update_stat(linha, valor, ':', 1);
+        obter_campo(linha, valor, ':', 1);
         aux = atoi(valor);
         count3 = aux + count_consulta_3;
 		
