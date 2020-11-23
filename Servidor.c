@@ -140,7 +140,6 @@ void tratar_Consulta(){
     wait(NULL);
 
 	lista_consultas[*indice_lista_consultas].tipo = -1;
-    //*indice_lista_consultas = *indice_lista_consultas - 1;
 }
 
 
@@ -187,52 +186,60 @@ void update_stat(char linha[], char total[], char delimitador, int indice){
 
 
 void atualizarStats(){
-
-	 FILE *file;
-
-    file = fopen("StatsConsultas.dat", "rt");
-
-	//if the file already exists update values
+   
 	int count;
-	int aux;
-	char linha[100];
-	char valor[100];
+    int aux;
+    char linha[100];
+    char valor[100];
+	int countP, count1, count2, count3;
+
+	if(access("StatsConsultas.dat", F_OK) == -1){
+		
+		 FILE *file;
+
+		file = fopen("StatsConsultas.dat", "r");
+		
+		fprintf(file, "tipo Perdidas:%d\n", count_consulta_perdida);
+        fprintf(file, "tipo 1:%d\n", count_consulta_1);
+		fprintf(file, "tipo 2:%d\n", count_consulta_2);
+		fprintf(file, "tipo 3:%d\n", count_consulta_3);
+        fclose(file);
+		exit(0);
+	}
+	else{
+
+		 FILE *file;
+
+		file = fopen("StatsConsultas.dat", "r");
+
+		fgets(linha, 100, file);  
+		update_stat(linha, valor, ':', 1);
+		aux = atoi(valor);
+		countP = aux + count_consulta_perdida;	
+		
+		fgets(linha, 100, file);
+        update_stat(linha, valor, ':', 1);
+        aux = atoi(valor);
+        count1 = aux + count_consulta_1; 
+
+		fgets(linha, 100, file);
+        update_stat(linha, valor, ':', 1);
+        aux = atoi(valor);
+        count2 = aux + count_consulta_2;
+
+		fgets(linha, 100, file);
+        update_stat(linha, valor, ':', 1);
+        aux = atoi(valor);
+        count3 = aux + count_consulta_3;
+		
+		fclose(file);
+
+		file = fopen("StatsConsultas.dat", "w");
+		
+		fprintf(file, "Perdidas:%d\nTipo 1:%d\nTipo 2:%d\nTipo 3:%d\n", countP, count1, count2, count3);
+		fclose(file);
+	}	
 	
-	//update consultas perdidas
-	fgets(linha, 100, file);	
-
-	update_stat(linha, valor, ':', 1);	
-	count = atoi(valor) + count_consulta_perdida;
-	printf("Perdidas total %d", count);
-	
-	fprintf(file, "Perdidos:%d\n", count);
-
-	//update consultas tipo 1
-	fgets(linha, 100, file);    
-	printf("linhaaa %s\n", linha);	
-    update_stat(linha, valor, ':', 1);
-	printf("valor seraaaaa -- %s\n", valor);
-	aux = atoi(valor);
-	count = aux + count_consulta_1;
-	printf("O valor existente e: %d\n", aux);
-    printf("---1 total %d\n", count);
-	fprintf(file, "Tipo 1:%d\n", count);
-
-	//update consultas tipo 2
-    fgets(linha, 100, file);
-
-    update_stat(linha, valor, ':', 1);
-    count = atoi(valor) + count_consulta_2;
-    fprintf(file, "Tipo 2:%d\n", count);
-
-	//update consultas tipo 3
-    fgets(linha, 100, file);
-    
-    update_stat(linha, valor, ':', 3);
-    count = atoi(valor) + count_consulta_3;
-    fprintf(file, "Tipo 3:%d\n", count);
-
-	fclose(file);
 }
 
 
