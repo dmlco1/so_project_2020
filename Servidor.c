@@ -6,6 +6,8 @@
 #include "consulta.h"
 #include<unistd.h>
 
+#define TIME 10 
+
 typedef struct{
 	int perdidas;
 	int tipo1;
@@ -27,7 +29,7 @@ int count_consulta_3;
 int count_consulta_perdida;
 
 int n_Alarme;
-int acabar = 0;
+int acabar;
 
 
 Consulta *lista_consultas=NULL;
@@ -138,7 +140,7 @@ void tratar_Consulta(){
 		
 		//Wait 10 seconds until end of consulta
 		signal(SIGALRM, sinal_alarme);
-        alarm(10);
+        alarm(TIME);
 
         while(n_Alarme == 0){
             pause();    
