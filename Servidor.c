@@ -184,90 +184,48 @@ void tratar_Pedido_consulta(){
 }
 
 void atualizarStats(){
-   
-	int count;
-    int aux;
-    char linha[100];
-    char valor[100];
-	int countP, count1, count2, count3;
-	
 	//Check if file existis -> if not we just write the values in it
 	if(access("StatsConsultas.dat", F_OK) == -1){
 		
 		FILE *file;
 		Tipos t;
-		file = fopen("StatsConsultas.dat", "r");
+		file = fopen("StatsConsultas.dat", "w");
 		
+		//Colocar os valores da sessao no Tipo t
 		t.perdidas = count_consulta_perdida;
         t.tipo1 = count_consulta_1;
         t.tipo2 = count_consulta_2;
         t.tipo3 = count_consulta_3;
-        fwrite(&t, sizeof(t), 1, file);
+		
+		//Escrever no ficheiro o Tipo t, em que cada campo contem os valores da sessao
+		fwrite(&t, sizeof(t), 1, file);
 
-		//fprintf(file, "Tipo Perdidas:%d\nTipo 1:%d\nTipo 2:%d\nTipo 3:%d\n", count_consulta_perdida, count_consulta_1, count_consulta_2, count_consulta_3);
-        fclose(file);
+		fclose(file);
 		exit(0);
 	}
 	//if file already exists we need to read all the values first and then update the stats
 	else{
 		FILE *file;
 		
-		Tipos t;
-		TiposFile tf;
-		/*
+		Tipos t; //Tipos atualizados que irao ser colocados no ficheiro
+		TiposFile tf; //Tipos lidos no ficheiro 
+
 		file = fopen("StatsConsultas.dat", "r");
-	
-		fgets(linha, 100, file);  
-		obter_campo(linha, valor, ':', 1);
-		aux = atoi(valor);
-		//countP = aux + count_consulta_perdida;	
-
-		fgets(linha, 100, file);
-        obter_campo(linha, valor, ':', 1);
-        aux = atoi(valor);
-        count1 = aux + count_consulta_1; 
-
-		fgets(linha, 100, file);
-        obter_campo(linha, valor, ':', 1);
-        aux = atoi(valor);
-        count2 = aux + count_consulta_2;
-
-		fgets(linha, 100, file);
-        obter_campo(linha, valor, ':', 1);
-        aux = atoi(valor);
-        count3 = aux + count_consulta_3;
-		
-		fclose(file);
-		*/
-		/*file = fopen("StatsConsultas.dat", "w");	
-		Tipos t;
-		
-		t.perdidas = 1;
-		t.tipo1 = 0;
-		t.tipo2 = 2;
-		t.tipo3 = 3;
-		fwrite(&t, sizeof(t), 1, file);
-		//fclose(file);
-		*/
-		file = fopen("StatsConsultas.dat", "r");
-		fread(&tf, sizeof(tf), 1, file);
+		fread(&tf, sizeof(tf), 1, file); //Colocar todos os valores do ficheiro no Tipo tf
 		fclose(file);
 
+		//Atualizar os dados e colocar os valores nos campos do Tipo t
 		t.perdidas = tf.perdidas + count_consulta_perdida;
 		t.tipo1 = tf.tipo1 + count_consulta_1;
 		t.tipo2 = tf.tipo2 + count_consulta_2;
 		t.tipo3 = tf.tipo3 + count_consulta_3;
-        
+
+		printf("O valor era %d\n", tf.tipo2);
+		printf("O valor de 2 vai ser %d\n", t.tipo2);
+	    //Escrever no ficheiro os dados atualizados (contidos no Tipo t)    
 		file = fopen("StatsConsultas.dat", "w");
         fwrite(&t, sizeof(t), 1, file);
         fclose(file);
-
-		/*char frase[50] = "Perdidas: ";
-        sprintf(&frase[9], "%d\n", count_consulta_perdida);
-		fwrite(&frase, sizeof(frase), 1, file);*/
-
-		//fprintf(file, "Perdidas:%d\nTipo 1:%d\nTipo 2:%d\nTipo 3:%d\n", countP, count1, count2, count3);
-		//fclose(file);
 	}	
 	
 }
