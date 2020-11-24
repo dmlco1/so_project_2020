@@ -45,7 +45,8 @@ int pid_of_SrvConsultas(){
 	//if the file does not exists yet
     if(file == NULL){
         printf("O ficheiro SrvConsultas.pid nao existe\n");
-        exit(0);
+        remove("PedidoConsulta.txt"); //Apagar o Pedido de Consulta e sair do programa se o Servidor nao tiver ativo
+		exit(0);
     }
 	
 	//read the pid of the server
