@@ -2,21 +2,21 @@
 
 void main(){
 
-	Consulta c;
+	Mensagem m;
 	char tipo[10];
 
 	// c1) c2) Introduzir os dados de consulta
 	printf("Tipo de Consulta: ");
 	fgets(tipo, 10, stdin);
-	c.tipo = atoi(tipo);
+	m.Consulta.tipo = atoi(tipo);
+	//Confirmar se o input e valido
+	if(m.Consulta.tipo != 1 && m.Consulta.tipo != 2 && m.Consulta.tipo != 3){printf("Input invalido\n");exit(1);}
 
 	printf("Descricao: ");
-    fgets(c.descricao, 100, stdin);
-    c.descricao[strlen(c.descricao)-1] = 0;
+    fgets(m.Consulta.descricao, 100, stdin);
+    m.Consulta.descricao[strlen(m.Consulta.descricao)-1] = 0;
 
-	c.pid_consulta = getpid();
-	c.status = 1;
-
-	
+	m.Consulta.pid_consulta = getpid();
+	m.Consulta.status = 1;
 
 }

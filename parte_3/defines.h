@@ -13,8 +13,11 @@
 #define IPCS_KEY 0x0a92697
 
 typedef struct{
-    int tipo; //Tipo Consulta: 1-Normal, 2-COVID19, 3-Urgente
-    char descricao[100]; //Descricao da consulta
-	int pid_consulta; //PID do processoque quer fazer consulta
-	int status; //Estado consulta: 1-Pedido, 2-Iniciada, 3-Terminada, 4-Recusada, 5-Cancelada
-}Consulta;
+	long tipo;
+	struct{
+		int tipo; //Tipo Consulta: 1-Normal, 2-COVID19, 3-Urgente
+		char descricao[100]; //Descricao da consulta
+		int pid_consulta; //PID do processoque quer fazer consulta
+		int status; //Estado consulta: 1-Pedido, 2-Iniciada, 3-Terminada, 4-Recusada, 5-Cancelada
+	}Consulta; //struct da consulta
+}Mensagem; //Struct da mensagem a enviar
