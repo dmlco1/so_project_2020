@@ -10,9 +10,7 @@ int countTipo1, countTipo2, countTipo3, countPerdidas;
 int iniciar, acabar;
 int id, status, msg_queue_id, msg_queue_status;
 
-
-void main(){
-	
+void main(){	
 	//Check if shared memory already exists
 	if (shmget(IPCS_KEY, TAMANHO * sizeof(Mensagem), IPC_CREAT | IPC_EXCL | 0600) > 0){
 		iniciar = 1;
@@ -22,7 +20,7 @@ void main(){
     Mensagem *lista_consultas = (Mensagem*)shmat ( id, 0, 0 ); exit_on_null (lista_consultas, "Attach");
 	
 	//Se e a primeira vez a ser criada, inicializamos o array
-	if(iniciar){
+	if(check()){
 		printf("Como nao exsitia iniciamos\n");
 		for(int i = 0; i < TAMANHO; i++){
 			lista_consultas[i].Consulta.tipo = 1;
