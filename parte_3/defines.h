@@ -19,5 +19,5 @@ typedef struct{
 		char descricao[100]; //Descricao da consulta
 		int pid_consulta; //PID do processoque quer fazer consulta
 		int status; //Estado consulta: 1-Pedido, 2-Iniciada, 3-Terminada, 4-Recusada, 5-Cancelada
-	}Consulta; //struct da consulta
-}Mensagem; //Struct da mensagem a enviar
+	}Dados_Consulta; //struct da consulta
+}Consulta; //Struct da mensagem a enviar
