@@ -8,16 +8,25 @@ Consulta *lista_consultas;
 int *indice_lista_consultas = NULL;
 int countTipo1;
 int /*countTipo1,*/ countTipo2, countTipo3, countPerdidas;
-int iniciar/*, acabar*/;
+int iniciar, acabar;
 int id, status, msg_queue_id, msg_queue_status;
 //void encerrar();
-
 
 
 void encerrar(){
 	printf("\nTipo 1: %d\nTipo 2: %d\nTipo 3: %d\nPerdidas: %d\n", countTipo1, countTipo2, countTipo3, countPerdidas);
 	exit(1);
 }
+
+void processarConsulta(int sinal){
+	//msg_queue_status = msgrcv( msg_queue_id, &c, sizeof(c), c.Dados_Consulta.pid_consulta, 0);
+      //  exit_on_error (msg_queue_status, "Rececao de sinal");
+       // if(c.Dados_Consulta.status == 5){exit(0);}
+	if(sinal == SIGALRM){
+		acabar = 1;
+	}
+}
+
 
 void main(){	
 	indice_lista_consultas = malloc(sizeof(int));
@@ -54,6 +63,8 @@ void main(){
 	exit_on_error( msg_queue_id, "Erro a criar message queue");
 	
 	signal(SIGINT, encerrar);
+	
+	signal(SIGALRM, processarConsulta);
 	printf("PID MAIN %d\n", getpid()); 	
 	
 	//Ficar a espera de mensagens
@@ -99,7 +110,18 @@ void main(){
 					//Mandar mensagem tipo 2-Iniciada para o cliente
 					msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
 					exit_on_error(msg_queue_status, "Erro de envio");
-					sleep(DURACAO);
+
+					msg_queue_status = msgrcv( msg_queue_id, &c, sizeof(c), c.Dados_Consulta.pid_consulta, 0);
+                    exit_on_error (msg_queue_status, "Rececao de sinal");					
+
+					alarm(DURACAO);
+					while(acabar == 0){
+						msg_queue_status = msgrcv( msg_queue_id, &c, sizeof(c), c.Dados_Consulta.pid_consulta, 0);
+						exit_on_error (msg_queue_status, "Rececao de sinal");
+						if(c.Dados_Consulta.status == 5){exit(0);}
+					}	
+					
+					//sleep(DURACAO);
 			
 					printf("Consulta terminada na sala <%d>\n", *indice_lista_consultas);
 					c.tipo = c.Dados_Consulta.pid_consulta;

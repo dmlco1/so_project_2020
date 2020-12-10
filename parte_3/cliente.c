@@ -14,7 +14,7 @@ void cancelar_espera(){
 	c.Dados_Consulta.status = 5;
 	
 	msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
-    exit_on_error (msg_queue_status, "Recepção");
+    exit_on_error (msg_queue_status, "Erro de envio");
 
     exit(0);
 }
