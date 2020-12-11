@@ -8,14 +8,14 @@ void cancelar_espera(){
     printf("Paciente cancelou o pedido\n");
 	
 	//ligar a message queue do servidor dedicado
-    msg_queue_id = msgget ( IPCS_KEY, 0600 | IPC_CREAT ); 
-    exit_on_error (msg_queue_id, "Erro a ligar a mssage queue");
+//    msg_queue_id = msgget ( IPCS_KEY, 0600 | IPC_CREAT ); 
+  //  exit_on_error (msg_queue_id, "Erro a ligar a mssage queue");
 	
 	c.Dados_Consulta.status = 5;
-	
+	c.tipo = 1;	
 	msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
     exit_on_error (msg_queue_status, "Erro de envio");
-
+	printf("ENVIADO\n");
     exit(0);
 }
 
@@ -42,18 +42,31 @@ void main(){
 	msg_queue_id = msgget ( IPCS_KEY, 0600 | IPC_CREAT ); 
 	exit_on_error (msg_queue_id, "Erro a ligar a mssage queue");
 
+
 	//Enviar mensagem com o tipo 1
 	msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0); 
 	exit_on_error(msg_queue_status, "Erro de envio");
+	
+	printf("Enviada com tipo %d e status %d\n", c.Dados_Consulta.tipo, c.Dados_Consulta.status);
 
 	//c7)
-    signal(SIGINT, cancelar_espera);
+//    signal(SIGINT, cancelar_espera);
+
+
+	//envar sinal status 5
+/*	c.Dados_Consulta.status = 5;
+    c.tipo = 1;
+    msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
+    exit_on_error (msg_queue_status, "Erro de envio");
+    printf("ENVIADO\n");
+    exit(0);
+*/
 
 	while(1){
 		//Receber mensagem
 		msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(c), getpid(), 0);
 		exit_on_error (msg_queue_status, "Recepção");
-	
+		
 		//c4) c5) c6)	
 		switch(c.Dados_Consulta.status){
         case 2: iniciar = 1;printf("Consulta iniciada para o processo %d\n", c.Dados_Consulta.pid_consulta);break;
