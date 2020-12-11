@@ -46,6 +46,8 @@ void main(){
 	//Enviar mensagem com o tipo 1
 	msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0); 
 	exit_on_error(msg_queue_status, "Erro de envio");
+
+	printf("long %d, tipo %d, pid %d, status %d\n", c.tipo, c.Dados_Consulta.tipo, c.Dados_Consulta.pid_consulta,c.Dados_Consulta.status);
 	
 	printf("Enviada com tipo %d e status %d\n", c.Dados_Consulta.tipo, c.Dados_Consulta.status);
 
