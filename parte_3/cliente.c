@@ -39,7 +39,7 @@ void main(){
 	c.tipo = 1;
 
 	//ligar a message queue
-	msg_queue_id = msgget ( IPCS_KEY, 0600 | IPC_CREAT ); 
+	msg_queue_id = msgget ( IPCS_KEY, IPC_CREAT | 0600); 
 	exit_on_error (msg_queue_id, "Erro a ligar a mssage queue");
 
 
