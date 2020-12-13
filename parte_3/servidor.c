@@ -5,7 +5,7 @@
 
 Consulta *lista_consultas;
 int *indice_lista_consultas, *countTipo1, *countTipo2, *countTipo3, *countPerdidas;
-int iniciar, acabar, id, status, msg_queue_id, msg_queue_status;
+int iniciar, acabar, receber, id, status, msg_queue_id, msg_queue_status;
 void encerrar();
 int childPid;
 
@@ -63,67 +63,70 @@ void main(){
 
 		if(c.Dados_Consulta.status == 1){
 			printf ("Chegou um novo pedido de consulta do tipo <%d>, descricao <%s> e PID <%d>\n", c.Dados_Consulta.tipo, c.Dados_Consulta.descricao, c.Dados_Consulta.pid_consulta);
+			receber = 1;
+		}			
+		//fork -> Criar Servidor dedicado
+		int n = fork();
+		if(n == 0 && receber){
+			childPid = getpid();	
+			int vaga;
+			
+			for(int i = 0; i < TAMANHO; i++){
+				if((lista_consultas[i]).Dados_Consulta.tipo == -1){
+					*indice_lista_consultas = i;
+					vaga = 1;
+					break;
+				}			
+			}
+			//Se tem vaga coloca a consulta no indice - Comeca no fim e vai para o inicio!
+			if(vaga){
+				lista_consultas[*indice_lista_consultas] = c;
 					
-			//fork -> Criar Servidor dedicado
-			int n = fork();
-			if(n == 0){
-				childPid = getpid();	
-				int vaga;
-				for(int i = 0; i < TAMANHO; i++){
-					if((lista_consultas[i]).Dados_Consulta.tipo == -1){
-						*indice_lista_consultas = i;
-						vaga = 1;
-						break;
-					}
-			    }
-				//Se tem vaga coloca a consulta no indice - Comeca no fim e vai para o inicio!
-				if(vaga){
-					lista_consultas[*indice_lista_consultas] = c;
-					
-					printf("Consulta agendada para a sala <%d>\n", *indice_lista_consultas);
-					//update_count(c);
+				printf("Consulta agendada para a sala <%d>\n", *indice_lista_consultas);
 				
-					//incrementar o respetivo contador
-					c.tipo = c.Dados_Consulta.pid_consulta;
-					c.Dados_Consulta.status = 2;
-					//Mandar mensagem tipo 2-Iniciada para o cliente
-					msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
-					exit_on_error(msg_queue_status, "Erro de envio");
+				//incrementar o respetivo contador
+				c.tipo = c.Dados_Consulta.pid_consulta;
+				c.Dados_Consulta.status = 2;
+				//Mandar mensagem tipo 2-Iniciada para o cliente
+				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
+				exit_on_error(msg_queue_status, "Erro de envio");
 					
-					//alarm(DURACAO);
-					sleep(DURACAO);
+				//alarm(DURACAO);
+				sleep(DURACAO);
 					
-					//DEpois de terminar a consulta, retira-la da lista
-					lista_consultas[*indice_lista_consultas].Dados_Consulta.tipo = -1;				
-	
-					printf("Consulta terminada na sala <%d>\n", *indice_lista_consultas);
-					c.tipo = c.Dados_Consulta.pid_consulta;
-					c.Dados_Consulta.status = 3;
-					update_count(c);					
+				printf("Consulta terminada na sala <%d>\n", *indice_lista_consultas);
+				c.tipo = c.Dados_Consulta.pid_consulta;
+				c.Dados_Consulta.status = 3;
+				update_count(c);					
 
-					//Mandar mensagem tipo 3-Terminada para o cliente
-					msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
-					exit_on_error(msg_queue_status, "Erro de envio");
-					exit(0);
+				//Mandar mensagem tipo 3-Terminada para o cliente
+				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
+				exit_on_error(msg_queue_status, "Erro de envio");
+			
+				//Depois de terminar a consulta, retira-la da lista
+                //lista_consultas[*indice_lista_consultas].Dados_Consulta.tipo = -1;
+				exit(0);
 				}
-				else{
-					//Se nao houver vagas na lista
-					printf("Lista de consultas cheia\n");
-					*countPerdidas = *countPerdidas + 1;
-					c.tipo = c.Dados_Consulta.pid_consulta;
-					c.Dados_Consulta.status = 4;
+			else{
+				//Se nao houver vagas na lista
+				printf("Lista de consultas cheia\n");
+				*countPerdidas = *countPerdidas + 1;
+				c.tipo = c.Dados_Consulta.pid_consulta;
+				c.Dados_Consulta.status = 4;
 				
-					//Mandar mensagem tipo 4-Perdida para o cliente
-					msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
-					exit_on_error(msg_queue_status, "Erro de envio");
-					exit(0);				
-				}
-			}		
+				//Mandar mensagem tipo 4-Perdida para o cliente
+				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
+				exit_on_error(msg_queue_status, "Erro de envio");
+				exit(0);				
+			}
+		}
+		else{		
 			//wait(NULL);
-			//waitpid(childPid, NULL, WCONTINUED);
-		    //msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), c.Dados_Consulta.pid_consulta, 0);
+			waitpid(childPid, NULL, WNOHANG);
+			printf("PAI ativo\n");
+			//msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), 1, 0);
 			//exit_on_error(msg_queue_status, "Recepção");
-			if(c.Dados_Consulta.status == 5){acabar = 1; kill(childPid, SIGKILL); printf("\nConsulta cancelada pelo utilizador %d\n", childPid);}			
+			if(c.Dados_Consulta.status == 5){acabar = 1; printf("\nConsulta cancelada pelo utilizador %d\n", childPid); kill(childPid, SIGKILL);}			
 			printf("O pai esta ativo\n");
 		}
 	}
@@ -137,6 +140,5 @@ void encerrar(){
     printf("Perdidas: %d\n", *countPerdidas);
     exit(0);
 }
-
 
 

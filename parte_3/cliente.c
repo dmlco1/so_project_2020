@@ -1,7 +1,7 @@
 #include "defines.h"
 
 Consulta c;
-int msg_queue_id, msg_queue_status/*, acabar*/, iniciar;
+int msg_queue_id, msg_queue_status, iniciar;
 
 //void cancelar_espera(Mensagem msg);
 void cancelar_espera(){
