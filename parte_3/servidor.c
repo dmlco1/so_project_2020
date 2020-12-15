@@ -3,7 +3,7 @@
 #define DURACAO 10
 #define TAMANHO 10
 
-
+//Struct do semaforo
 struct sembuf UP = {0, 1, 0};
 struct sembuf DOWN = {0, -1, 0};
 
@@ -94,20 +94,19 @@ void main(){
 			childPid = getpid();	
 			int vaga, sala;
 			
-			//Zona de exclusao -> Impedir que 2 consultas verifiquem vaga na mesma posicao do array
+			//Zona de exclusao -> Impedir que 2 consultas tentem aceder a mesma posicao da lista de consultas
 			sem_status = semop(sem_id, &DOWN, 1);
             exit_on_error(status, "DOWN");
 			for(int i = 0; i < TAMANHO; i++){
-				//verificar se existe vaga na lista de consultas
-				if((lista_consultas[i]).Dados_Consulta.tipo == -1){
+				
+			if((lista_consultas[i]).Dados_Consulta.tipo == -1){
 					*indice_lista_consultas = i;
 					sala = i;
 					vaga = 1;
 					break;
 				}			
 			}
-			sem_status = semop(sem_id, &UP, 1);
-            exit_on_error(status, "UP");
+		
 			//Se tem vaga coloca a consulta no indice - Comeca no fim e vai para o inicio!
 			if(vaga){
 				//Zona de exclusao
@@ -161,9 +160,16 @@ void main(){
 				exit(0);
 			}
 			else{
+				//Zona de exclusao
+                sem_status = semop(sem_id, &DOWN, 1);
+                exit_on_error(status, "DOWN");
 				//Se nao houver vagas na lista
 				printf("Lista de consultas cheia\n");
 				*countPerdidas = *countPerdidas + 1;
+				//Atualizar semaforo
+				sem_status = semop(sem_id, &UP, 1);
+                exit_on_error(status, "UP");
+				
 				c.tipo = c.Dados_Consulta.pid_consulta;
 				c.Dados_Consulta.status = 4;
 				
