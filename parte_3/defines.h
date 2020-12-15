@@ -12,7 +12,10 @@
 #define exit_on_null(s,m) if (s==NULL) { perror(m); exit(1); }
 #define exit_on_error(s,m) if (s<0) { perror(m); exit(1);}
 #define IPCS_KEY 0x0a92697
-
+/*
+struct sembuf UP = {0, 1, 0};
+struct sembuf DOWN = {0, -1, 0};
+*/
 typedef struct{
 	long tipo;
 	struct{

@@ -1,28 +1,35 @@
 #include "defines.h"
 
-
 #define DURACAO 10
 #define TAMANHO 10
 
+
+struct sembuf UP = {0, 1, 0};
+struct sembuf DOWN = {0, -1, 0};
+
 Consulta *lista_consultas;
 int *indice_lista_consultas, *countTipo1, *countTipo2, *countTipo3, *countPerdidas;
-int iniciar, receber, id, status, msg_queue_id, msg_queue_status;
+int iniciar, cancelar, receber, id, status, msg_queue_id, msg_queue_status, sem_id, sem_status;
 void encerrar();
 int childPid;
 
-int cancelar;
 
 void cancelar_consulta(){
 	cancelar = 1;
 }
 
 void update_count(Consulta c){
+	//Zona de exclusao
+	sem_status = semop(sem_id, &DOWN, 1);
+    exit_on_error(status, "DOWN");
 	switch(c.Dados_Consulta.tipo){
 		case 1: *countTipo1 = *countTipo1 +1;break;
         case 2: *countTipo2 = *countTipo2 + 1;break;
         case 3: *countTipo3 = *countTipo3 + 1;break;
         default: perror("ERRO"); exit(0);
     }
+	sem_status = semop(sem_id, &UP, 1);
+    exit_on_error(status, "UP");
 }
 
 void main(){	
@@ -36,6 +43,15 @@ void main(){
 	//Ligar a shared memory
 	id = shmget(IPCS_KEY, TAMANHO * sizeof(Consulta) + 5*sizeof(int), IPC_CREAT| 0600);
     Consulta *lista_consultas = (Consulta*)shmat( id, 0, 0 ); exit_on_null (lista_consultas, "Attach");
+
+
+	//Criar/ligar semaforo
+	sem_id = semget(IPCS_KEY, 1, IPC_CREAT | 0600);
+	exit_on_error(id, "Erro a criar/ligar semaforo");
+	printf("Sem ID %d", sem_id);
+
+	sem_status = semctl(sem_id, 0, SETVAL, 1);
+	exit_on_error(status, "Erro a incicializar semaforo");
 
 	indice_lista_consultas = (int*)((void*)lista_consultas + TAMANHO * sizeof(Consulta));
 	countTipo1 = indice_lista_consultas + 1;	
@@ -67,11 +83,7 @@ void main(){
 		//Esperar que receba mensagem do tipo 1
         msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), 1, 0);
         exit_on_error(msg_queue_status, "Recepção");
-		/*if ( msg_queue_status == -1 ) {
-			continue;
-			//printf ("Erro na criação da fila de mensagens\n" ); exit(1);
-		}
-		*/
+		
 		if(c.Dados_Consulta.status == 1){
 			printf ("Chegou um novo pedido de consulta do tipo <%d>, descricao <%s> e PID <%d>\n", c.Dados_Consulta.tipo, c.Dados_Consulta.descricao, c.Dados_Consulta.pid_consulta);
 			receber = 1;
@@ -82,7 +94,11 @@ void main(){
 			childPid = getpid();	
 			int vaga, sala;
 			
+			//Zona de exclusao -> Impedir que 2 consultas verifiquem vaga na mesma posicao do array
+			sem_status = semop(sem_id, &DOWN, 1);
+            exit_on_error(status, "DOWN");
 			for(int i = 0; i < TAMANHO; i++){
+				//verificar se existe vaga na lista de consultas
 				if((lista_consultas[i]).Dados_Consulta.tipo == -1){
 					*indice_lista_consultas = i;
 					sala = i;
@@ -90,10 +106,19 @@ void main(){
 					break;
 				}			
 			}
+			sem_status = semop(sem_id, &UP, 1);
+            exit_on_error(status, "UP");
 			//Se tem vaga coloca a consulta no indice - Comeca no fim e vai para o inicio!
 			if(vaga){
+				//Zona de exclusao
+				sem_status = semop(sem_id, &DOWN, 1);
+				exit_on_error(status, "DOWN");
+				printf("SEM Status %d\n", sem_status);
+				//Colocar consulta recebida na lista
 				lista_consultas[*indice_lista_consultas] = c;
-					
+				sem_status = semop(sem_id, &UP, 1);
+				exit_on_error(status, "UP");
+				printf("status %d\n", sem_status);			
 				printf("Consulta agendada para a sala <%d>\n", sala);
 				
 				//incrementar o respetivo contador
@@ -133,8 +158,7 @@ void main(){
 			
 				//Depois de terminar a consulta, retira-la da lista
                 lista_consultas[sala].Dados_Consulta.tipo = -1;
-				//exit(0);
-				kill(getpid(), SIGKILL);
+				exit(0);
 			}
 			else{
 				//Se nao houver vagas na lista
