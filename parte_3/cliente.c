@@ -11,7 +11,6 @@ void cancelar_espera(){
 	c.tipo = pid;
 	msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
     exit_on_error (msg_queue_status, "Erro de envio");
-    exit(0);
 }
 
 void main(){
