@@ -64,7 +64,6 @@ void main(){
 
 	//Ficar a espera de mensagens
 	while(1){
-		int w;
 		//Esperar que receba mensagem do tipo 1
         msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), 1, 0);
         exit_on_error(msg_queue_status, "Recepção");
@@ -81,11 +80,12 @@ void main(){
 		int n = fork();
 		if(n == 0 && receber){
 			childPid = getpid();	
-			int vaga;
+			int vaga, sala;
 			
 			for(int i = 0; i < TAMANHO; i++){
 				if((lista_consultas[i]).Dados_Consulta.tipo == -1){
 					*indice_lista_consultas = i;
+					sala = i;
 					vaga = 1;
 					break;
 				}			
@@ -94,7 +94,7 @@ void main(){
 			if(vaga){
 				lista_consultas[*indice_lista_consultas] = c;
 					
-				printf("Consulta agendada para a sala <%d>\n", *indice_lista_consultas);
+				printf("Consulta agendada para a sala <%d>\n", sala);
 				
 				//incrementar o respetivo contador
 				c.tipo = c.Dados_Consulta.pid_consulta;
@@ -116,13 +116,13 @@ void main(){
 					//Se o servidor dedicado receber uma mensagem com status 5 -> cancelar consulta
 					if(c.Dados_Consulta.status == 5){
 						printf("\nConsulta cancelada pelo utilizador %d\n", c.Dados_Consulta.pid_consulta); 
-						lista_consultas[*indice_lista_consultas].Dados_Consulta.tipo = -1;
+						lista_consultas[sala].Dados_Consulta.tipo = -1;
 						exit(0);
 					}
 				}
 				
 				//Apos a consulta ser concluida
-				printf("Consulta terminada na sala <%d>\n", *indice_lista_consultas);
+				printf("Consulta terminada na sala <%d>\n", sala);
 				c.tipo = c.Dados_Consulta.pid_consulta;
 				c.Dados_Consulta.status = 3;
 				update_count(c);					
@@ -132,7 +132,7 @@ void main(){
 				exit_on_error(msg_queue_status, "Erro de envio");
 			
 				//Depois de terminar a consulta, retira-la da lista
-                lista_consultas[*indice_lista_consultas].Dados_Consulta.tipo = -1;
+                lista_consultas[sala].Dados_Consulta.tipo = -1;
 				//exit(0);
 				kill(getpid(), SIGKILL);
 			}
