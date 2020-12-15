@@ -98,7 +98,11 @@ void main(){
 			sem_status = semop(sem_id, &DOWN, 1);
             exit_on_error(status, "DOWN");
 			for(int i = 0; i < TAMANHO; i++){
-				
+
+			//Zona de exclusao -> Impedir que 2 Consultas tentem aceder ao mesmo indice da lista de consultas
+            sem_status = semop(sem_id, &DOWN, 1);
+            exit_on_error(status, "DOWN");				
+			//Verificar se existe vaga na lista de consultas
 			if((lista_consultas[i]).Dados_Consulta.tipo == -1){
 					*indice_lista_consultas = i;
 					sala = i;
@@ -106,6 +110,8 @@ void main(){
 					break;
 				}			
 			}
+			sem_status = semop(sem_id, &UP, 1);
+            exit_on_error(status, "UP");
 		
 			//Se tem vaga coloca a consulta no indice - Comeca no fim e vai para o inicio!
 			if(vaga){
