@@ -57,10 +57,15 @@ void main(){
 
 	//Ficar a espera de mensagens
 	while(1){
+		int w;
 		//Esperar que receba mensagem do tipo 1
         msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), 1, 0);
         exit_on_error(msg_queue_status, "Recepção");
-
+		/*if ( msg_queue_status == -1 ) {
+			continue;
+			//printf ("Erro na criação da fila de mensagens\n" ); exit(1);
+		}
+		*/
 		if(c.Dados_Consulta.status == 1){
 			printf ("Chegou um novo pedido de consulta do tipo <%d>, descricao <%s> e PID <%d>\n", c.Dados_Consulta.tipo, c.Dados_Consulta.descricao, c.Dados_Consulta.pid_consulta);
 			receber = 1;
@@ -90,22 +95,22 @@ void main(){
 				//Mandar mensagem tipo 2-Iniciada para o cliente
 				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
 				exit_on_error(msg_queue_status, "Erro de envio");
-					
+				
 				//alarm(DURACAO);
 				sleep(DURACAO);
-					
 				printf("Consulta terminada na sala <%d>\n", *indice_lista_consultas);
 				c.tipo = c.Dados_Consulta.pid_consulta;
 				c.Dados_Consulta.status = 3;
 				update_count(c);					
-
+			
 				//Mandar mensagem tipo 3-Terminada para o cliente
 				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
 				exit_on_error(msg_queue_status, "Erro de envio");
 			
 				//Depois de terminar a consulta, retira-la da lista
-                //lista_consultas[*indice_lista_consultas].Dados_Consulta.tipo = -1;
-				exit(0);
+                lista_consultas[*indice_lista_consultas].Dados_Consulta.tipo = -1;
+				//exit(0);
+				kill(getpid(), SIGKILL);
 				}
 			else{
 				//Se nao houver vagas na lista
@@ -120,14 +125,37 @@ void main(){
 				exit(0);				
 			}
 		}
-		else{		
-			//wait(NULL);
-			waitpid(childPid, NULL, WNOHANG);
-			printf("PAI ativo\n");
-			//msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), 1, 0);
-			//exit_on_error(msg_queue_status, "Recepção");
-			if(c.Dados_Consulta.status == 5){acabar = 1; printf("\nConsulta cancelada pelo utilizador %d\n", childPid); kill(childPid, SIGKILL);}			
-			printf("O pai esta ativo\n");
+		else{	
+			n = waitpid(childPid, NULL, WNOHANG);	
+			printf(" wpid - %d\n", n);
+			if(n == childPid){
+				printf("FIlho ainda esta a correr\n");
+				msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), c.Dados_Consulta.pid_consulta, IPC_NOWAIT);
+				//exit_on_error(msg_queue_status, "Recepção");
+				if ( msg_queue_status == -1 ) {
+					continue;
+				}
+
+				if(c.Dados_Consulta.status == 5){acabar = 1; printf("\nConsulta cancelada pelo utilizador %d\n", c.Dados_Consulta.pid_consulta); kill(childPid, SIGKILL);}
+			}
+			else if(n == -1){
+				perror("erro no pai\n");
+			}
+		//wait(NULL);
+		//w = waitpid(childPid, NULL, WNOHANG);
+		//printf("W a %d\n", w);
+		//if(w == 0){
+		//printf("PAI ativo\n");
+		//msg_queue_status = msgrcv(msg_queue_id, &c, sizeof(Consulta), c.Dados_Consulta.pid_consulta, IPC_NOWAIT);
+		//exit_on_error(msg_queue_status, "Recepção");
+		//printf("depois msgrcv pai\n");
+		//if ( msg_queue_status == -1 ) {
+         //   continue;
+            //printf ("Erro na criação da fila de mensagens\n" ); exit(1);
+       // }
+
+		//if(c.Dados_Consulta.status == 5){acabar = 1; printf("\nConsulta cancelada pelo utilizador %d\n", c.Dados_Consulta.pid_consulta); kill(childPid, SIGKILL);}
+		//printf("O pai esta ativo\n");
 		}
 	}
 }

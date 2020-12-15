@@ -1,4 +1,5 @@
 #include "defines.h"
+int pid;
 
 Consulta c;
 int msg_queue_id, msg_queue_status, iniciar;
@@ -6,9 +7,8 @@ int msg_queue_id, msg_queue_status, iniciar;
 //void cancelar_espera(Mensagem msg);
 void cancelar_espera(){
     printf("\nPaciente cancelou o pedido\n");
-	c.Dados_Consulta.status = 5;
-	c.tipo = getpid();	
-	
+	c.Dados_Consulta.status = 5;	
+	c.tipo = pid;
 	msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
     exit_on_error (msg_queue_status, "Erro de envio");
     exit(0);
@@ -16,7 +16,7 @@ void cancelar_espera(){
 
 void main(){
 	char tipo[10];
-
+	pid = getpid();
 	// c1) c2) Introduzir os dados de consulta
 	printf("Tipo de Consulta: ");
 	fgets(tipo, 10, stdin);
