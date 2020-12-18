@@ -48,10 +48,9 @@ void main(){
 	//Criar/ligar semaforo
 	sem_id = semget(IPCS_KEY, 1, IPC_CREAT | 0600);
 	exit_on_error(id, "Erro a criar/ligar semaforo");
-	printf("Sem ID %d", sem_id);
 
 	sem_status = semctl(sem_id, 0, SETVAL, 1);
-	exit_on_error(status, "Erro a incicializar semaforo");
+	exit_on_error(status, "Erro a inicializar semaforo");
 
 	indice_lista_consultas = (int*)((void*)lista_consultas + TAMANHO * sizeof(Consulta));
 	countTipo1 = indice_lista_consultas + 1;	
@@ -98,10 +97,9 @@ void main(){
 			sem_status = semop(sem_id, &DOWN, 1);
             exit_on_error(status, "DOWN");
 			for(int i = 0; i < TAMANHO; i++){
-
 			//Zona de exclusao -> Impedir que 2 Consultas tentem aceder ao mesmo indice da lista de consultas
-            sem_status = semop(sem_id, &DOWN, 1);
-            exit_on_error(status, "DOWN");				
+            sem_status = semop(sem_id, &UP, 1);
+            exit_on_error(status, "UP");				
 			//Verificar se existe vaga na lista de consultas
 			if((lista_consultas[i]).Dados_Consulta.tipo == -1){
 					*indice_lista_consultas = i;
@@ -110,20 +108,17 @@ void main(){
 					break;
 				}			
 			}
+			
 			sem_status = semop(sem_id, &UP, 1);
-            exit_on_error(status, "UP");
-		
-			//Se tem vaga coloca a consulta no indice - Comeca no fim e vai para o inicio!
+			exit_on_error(status, "UP");
 			if(vaga){
 				//Zona de exclusao
 				sem_status = semop(sem_id, &DOWN, 1);
 				exit_on_error(status, "DOWN");
-				printf("SEM Status %d\n", sem_status);
 				//Colocar consulta recebida na lista
 				lista_consultas[*indice_lista_consultas] = c;
 				sem_status = semop(sem_id, &UP, 1);
 				exit_on_error(status, "UP");
-				printf("status %d\n", sem_status);			
 				printf("Consulta agendada para a sala <%d>\n", sala);
 				
 				//incrementar o respetivo contador
