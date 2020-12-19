@@ -9,10 +9,9 @@ struct sembuf DOWN = {0, -1, 0};
 
 Consulta *lista_consultas;
 int *indice_lista_consultas, *countTipo1, *countTipo2, *countTipo3, *countPerdidas;
-int iniciar, cancelar, receber, id, status, msg_queue_id, msg_queue_status, sem_id, sem_status;
-void encerrar();
-int childPid;
+int childPid, iniciar, cancelar, receber, id, status, msg_queue_id, msg_queue_status, sem_id, sem_status;
 
+void encerrar();
 
 void cancelar_consulta(){
 	cancelar = 1;
@@ -141,7 +140,13 @@ void main(){
 					//Se o servidor dedicado receber uma mensagem com status 5 -> cancelar consulta
 					if(c.Dados_Consulta.status == 5){
 						printf("\nConsulta cancelada pelo utilizador %d\n", c.Dados_Consulta.pid_consulta); 
+						//Zona de exclusao
+						sem_status = semop(sem_id, &DOWN, 1);
+						exit_on_error(status, "DOWN");
+						//Retirar a consulta da lista
 						lista_consultas[sala].Dados_Consulta.tipo = -1;
+						sem_status = semop(sem_id, &UP, 1);
+						exit_on_error(status, "UP");
 						exit(0);
 					}
 				}
@@ -155,9 +160,14 @@ void main(){
 				//Mandar mensagem tipo 3-Terminada para o cliente
 				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
 				exit_on_error(msg_queue_status, "Erro de envio");
-			
+
+				//Zona de exclusao
+                sem_status = semop(sem_id, &DOWN, 1);
+                exit_on_error(status, "DOWN");			
 				//Depois de terminar a consulta, retira-la da lista
                 lista_consultas[sala].Dados_Consulta.tipo = -1;
+				sem_status = semop(sem_id, &UP, 1);
+                exit_on_error(status, "UP");
 				exit(0);
 			}
 			else{
@@ -177,7 +187,7 @@ void main(){
 				//Mandar mensagem tipo 4-Perdida para o cliente
 				msg_queue_status = msgsnd(msg_queue_id, &c, sizeof(c), 0);
 				exit_on_error(msg_queue_status, "Erro de envio");
-				exit(0);				
+				exit(0);
 			}
 		}
 		waitpid(childPid, NULL, IPC_NOWAIT);
@@ -186,11 +196,19 @@ void main(){
 
 
 void encerrar(){
-    printf("\nTipo 1: %d\n", *countTipo1);
+    //Zona de exclusao
+	sem_status = semop(sem_id, &DOWN, 1);
+    exit_on_error(status, "DOWN");
+	
+	printf("\nTipo 1: %d\n", *countTipo1);
     printf("Tipo 2: %d\n", *countTipo2);
     printf("Tipo 3: %d\n", *countTipo3);
     printf("Perdidas: %d\n", *countPerdidas);
-    exit(0);
+    
+	//Atualizar semaforo
+    sem_status = semop(sem_id, &UP, 1);
+	exit_on_error(status, "UP");
+	exit(0);
 }
 
 
